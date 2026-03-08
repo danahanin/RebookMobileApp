@@ -37,7 +37,6 @@
             app:popUpToInclusive="true" />
     </fragment>
 
-    <!-- Placeholder: Person B will replace this with the full main container -->
     <fragment
         android:id="@+id/mainFragment"
         android:name="com.rebook.app.ui.main.MainFragment"
@@ -48,6 +47,46 @@
             app:destination="@id/loginFragment"
             app:popUpTo="@id/mainFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_main_to_bookDetails"
+            app:destination="@id/bookDetailsFragment" />
+        <action
+            android:id="@+id/action_main_to_addEditBook"
+            app:destination="@id/addEditBookFragment" />
+        <action
+            android:id="@+id/action_main_to_editProfile"
+            app:destination="@id/editProfileFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/bookDetailsFragment"
+        android:name="com.rebook.app.ui.book.BookDetailsFragment"
+        android:label="Book Details"
+        tools:layout="@layout/fragment_book_details">
+        <argument
+            android:name="bookId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_bookDetails_to_addEditBook"
+            app:destination="@id/addEditBookFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/addEditBookFragment"
+        android:name="com.rebook.app.ui.book.AddEditBookFragment"
+        android:label="Add/Edit Book"
+        tools:layout="@layout/fragment_add_edit_book">
+        <argument
+            android:name="bookId"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/editProfileFragment"
+        android:name="com.rebook.app.ui.profile.EditProfileFragment"
+        android:label="Edit Profile"
+        tools:layout="@layout/fragment_edit_profile" />
 
 </navigation>
