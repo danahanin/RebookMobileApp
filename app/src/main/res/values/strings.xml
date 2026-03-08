@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">ReBook</string>
+    <string name="app_tagline">Exchange books with your community</string>
+
+    <!-- Auth -->
+    <string name="hint_email">Email</string>
+    <string name="hint_password">Password</string>
+    <string name="hint_full_name">Full Name</string>
+    <string name="btn_login">Log In</string>
+    <string name="btn_register">Create Account</string>
+    <string name="btn_logout">Log Out</string>
+    <string name="link_go_to_register">Don\'t have an account? Sign up</string>
+    <string name="link_go_to_login">Already have an account? Log in</string>
+
+    <!-- Errors -->
+    <string name="error_empty_email">Email is required</string>
+    <string name="error_empty_password">Password is required</string>
+    <string name="error_empty_name">Name is required</string>
+    <string name="error_short_password">Password must be at least 6 characters</string>
+    <string name="error_invalid_email">Enter a valid email address</string>
+    <string name="error_generic">Something went wrong. Please try again.</string>
+
+    <!-- Main -->
+    <string name="nav_explore">Explore</string>
+    <string name="nav_profile">Profile</string>
+    <string name="welcome_message">Welcome to ReBook!</string>
+</resources>

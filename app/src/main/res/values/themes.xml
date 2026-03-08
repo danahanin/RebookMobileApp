@@ -1,0 +1,12 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <style name="Base.Theme.Rebook" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/green_primary</item>
+        <item name="colorPrimaryVariant">@color/green_primary_variant</item>
+        <item name="colorSecondary">@color/blue_secondary</item>
+        <item name="colorSecondaryVariant">@color/blue_secondary_variant</item>
+        <item name="colorError">@color/error_red</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+    </style>
+
+    <style name="Theme.Rebook" parent="Base.Theme.Rebook" />
+</resources>
