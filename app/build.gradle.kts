@@ -8,12 +8,12 @@ plugins {
 
 android {
     namespace = "com.rebook.app"
-    compileSdk = 36
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.rebook.app"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -37,6 +37,10 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = "11"
     }
 }
 
