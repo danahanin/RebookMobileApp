@@ -9,8 +9,10 @@ data class Book(
     val description: String = "",
     val imageUrl: String? = null,
     val ownerId: String = "",
+    val ownerName: String = "",
     val status: BookStatus = BookStatus.AVAILABLE,
-    val requestedById: String? = null
+    val requestedById: String? = null,
+    val createdAt: Long = 0L
 ) {
     fun toEntity(): BookEntity = BookEntity(
         id = id,
@@ -19,8 +21,10 @@ data class Book(
         description = description,
         imageUrl = imageUrl,
         ownerId = ownerId,
+        ownerName = ownerName,
         status = status.name,
-        requestedById = requestedById
+        requestedById = requestedById,
+        createdAt = createdAt
     )
 
     companion object {
@@ -31,8 +35,10 @@ data class Book(
             description = entity.description,
             imageUrl = entity.imageUrl,
             ownerId = entity.ownerId,
+            ownerName = entity.ownerName,
             status = BookStatus.valueOf(entity.status),
-            requestedById = entity.requestedById
+            requestedById = entity.requestedById,
+            createdAt = entity.createdAt
         )
     }
 }
