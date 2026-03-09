@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "466994512943",
+    "project_id": "rebook-7f8db",
+    "storage_bucket": "rebook-7f8db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:466994512943:android:04719c5b0394ff3da4b2da",
+        "android_client_info": {
+          "package_name": "com.rebook.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEM0ueXOrrqdgRg5W6wPvCTcfwW2f_0mg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+
+    <!-- Brand colors -->
+    <color name="green_primary">#388E3C</color>
+    <color name="green_primary_variant">#1B5E20</color>
+    <color name="green_light">#C8E6C9</color>
+    <color name="blue_secondary">#1976D2</color>
+    <color name="blue_secondary_variant">#0D47A1</color>
+    <color name="error_red">#D32F2F</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="on_primary">#FFFFFF</color>
+    <color name="status_available">#388E3C</color>
+    <color name="status_requested">#F57C00</color>
+</resources>
