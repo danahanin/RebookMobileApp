@@ -32,12 +32,23 @@ class BookRepository(context: Context) {
                 .get()
                 .await()
             val entities = snapshot.documents.mapNotNull { doc ->
-                val entity = doc.toObject(com.rebook.app.data.local.entity.BookEntity::class.java)
-                entity?.copy(id = doc.id)
+                val data = doc.data ?: return@mapNotNull null
+                com.rebook.app.data.local.entity.BookEntity(
+                    id = doc.id,
+                    title = data["title"] as? String ?: "",
+                    author = data["author"] as? String ?: "",
+                    description = data["description"] as? String ?: "",
+                    imageUrl = data["imageUrl"] as? String,
+                    ownerId = data["ownerId"] as? String ?: "",
+                    ownerName = data["ownerName"] as? String ?: "",
+                    status = data["status"] as? String ?: "AVAILABLE",
+                    requestedById = data["requestedById"] as? String,
+                    createdAt = data["createdAt"] as? Long ?: 0L
+                )
             }
             bookDao.insertBooks(entities)
         } catch (e: Exception) {
-            // Fail silently — cached data is used
+            android.util.Log.e("BookRepository", "Sync failed: ${e.message}", e)
         }
     }
 
@@ -115,6 +126,28 @@ class BookRepository(context: Context) {
                     cached.copy(
                         status = BookStatus.REQUESTED.name,
                         requestedById = currentUser.uid
+                    )
+                )
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun unrequestBook(bookId: String): Result<Unit> {
+        return try {
+            val updates = mapOf(
+                "status" to BookStatus.AVAILABLE.name,
+                "requestedById" to null
+            )
+            booksRef.document(bookId).update(updates).await()
+            val cached = bookDao.getBookById(bookId)
+            if (cached != null) {
+                bookDao.updateBook(
+                    cached.copy(
+                        status = BookStatus.AVAILABLE.name,
+                        requestedById = null
                     )
                 )
             }

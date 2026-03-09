@@ -107,6 +107,18 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun unrequestBook(bookId: String) {
+        _operationState.value = BookOperationState.Loading
+        viewModelScope.launch {
+            val result = repository.unrequestBook(bookId)
+            _operationState.value = if (result.isSuccess) {
+                BookOperationState.Success
+            } else {
+                BookOperationState.Error(result.exceptionOrNull()?.message ?: "Failed to cancel request")
+            }
+        }
+    }
+
     fun resetOperationState() {
         _operationState.value = BookOperationState.Idle
     }
