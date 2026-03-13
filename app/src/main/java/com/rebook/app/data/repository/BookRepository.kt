@@ -1,21 +1,25 @@
 package com.rebook.app.data.repository
 
 import android.content.Context
+import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import com.google.firebase.storage.FirebaseStorage
 import com.rebook.app.data.local.AppDatabase
 import com.rebook.app.data.model.Book
 import com.rebook.app.data.model.BookStatus
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
 class BookRepository(context: Context) {
 
     private val bookDao = AppDatabase.getInstance(context).bookDao()
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val storage = FirebaseStorage.getInstance()
     private val booksRef = firestore.collection("books")
 
     fun getAllBooks(): Flow<List<Book>> =
@@ -152,6 +156,21 @@ class BookRepository(context: Context) {
                 )
             }
             Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun uploadBookImage(imageUri: Uri): Result<String> {
+        return try {
+            val uid = auth.currentUser?.uid
+                ?: return Result.failure(Exception("User not logged in"))
+
+            val fileName = "${uid}_${UUID.randomUUID()}.jpg"
+            val ref = storage.reference.child("book_images/$fileName")
+            ref.putFile(imageUri).await()
+            val downloadUrl = ref.downloadUrl.await().toString()
+            Result.success(downloadUrl)
         } catch (e: Exception) {
             Result.failure(e)
         }
