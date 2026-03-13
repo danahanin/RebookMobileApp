@@ -4,16 +4,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.rebook.app.R
-import com.rebook.app.data.model.Book
-import com.rebook.app.data.model.User
 import com.rebook.app.databinding.FragmentProfileBinding
+import com.rebook.app.util.BookOperationState
 import com.rebook.app.viewmodel.AuthViewModel
 import com.rebook.app.viewmodel.BookViewModel
 import com.rebook.app.viewmodel.UserViewModel
@@ -41,16 +40,22 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupAdapter()
-        setupClickListeners()
+        setupRecyclerView()
         observeUser()
         observeMyBooks()
+        observeBookOperations()
+        setupButtons()
     }
 
-    private fun setupAdapter() {
+    override fun onResume() {
+        super.onResume()
+        userViewModel.loadCurrentUser()
+    }
+
+    private fun setupRecyclerView() {
         myBooksAdapter = MyBooksAdapter(
-            onEditClick = ::onEditBookClick,
-            onDeleteClick = ::onDeleteBookClick
+            onEditClick = { book -> navigateToEditBook(book.id) },
+            onDeleteClick = { book -> showDeleteConfirmation(book.id) }
         )
         binding.rvMyBooks.apply {
             layoutManager = LinearLayoutManager(requireContext())
@@ -58,81 +63,94 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun setupClickListeners() {
+    private fun observeUser() {
+        userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
+            if (user != null) {
+                binding.tvUserName.text = user.displayName.ifEmpty { "No name" }
+                binding.tvUserEmail.text = user.email
+                loadProfileImage(user.profileImageUrl)
+            }
+        }
+    }
+
+    private fun loadProfileImage(url: String?) {
+        if (!url.isNullOrEmpty()) {
+            Picasso.get()
+                .load(url)
+                .placeholder(R.drawable.ic_person)
+                .error(R.drawable.ic_person)
+                .into(binding.ivProfileImage)
+        } else {
+            binding.ivProfileImage.setImageResource(R.drawable.ic_person)
+        }
+    }
+
+    private fun observeMyBooks() {
+        val userId = userViewModel.getCurrentUserId() ?: return
+        bookViewModel.getBooksByOwner(userId).observe(viewLifecycleOwner) { books ->
+            myBooksAdapter.submitList(books)
+            binding.tvEmptyBooks.visibility = if (books.isEmpty()) View.VISIBLE else View.GONE
+            binding.rvMyBooks.visibility = if (books.isEmpty()) View.GONE else View.VISIBLE
+        }
+    }
+
+    private fun observeBookOperations() {
+        bookViewModel.operationState.observe(viewLifecycleOwner) { state ->
+            when (state) {
+                is BookOperationState.Loading -> binding.progressBar.visibility = View.VISIBLE
+                is BookOperationState.Success -> {
+                    binding.progressBar.visibility = View.GONE
+                    bookViewModel.resetOperationState()
+                }
+                is BookOperationState.Error -> {
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
+                    bookViewModel.resetOperationState()
+                }
+                is BookOperationState.Idle -> binding.progressBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun setupButtons() {
+        binding.btnEditProfile.setOnClickListener {
+            navigateToEditProfile()
+        }
+
+        binding.btnListBook.setOnClickListener {
+            navigateToAddBook()
+        }
+
         binding.btnLogout.setOnClickListener {
             authViewModel.logout()
             val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
             mainNavController.navigate(R.id.action_main_to_login)
         }
-
-        binding.btnEditProfile.setOnClickListener {
-            val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-            mainNavController.navigate(R.id.action_main_to_editProfile)
-        }
-
-        binding.btnListBook.setOnClickListener {
-            val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-            mainNavController.navigate(R.id.action_main_to_addEditBook)
-        }
     }
 
-    private fun observeUser() {
-        userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            user?.let { bindUserInfo(it) }
-        }
-    }
-
-    private fun bindUserInfo(user: User) {
-        binding.tvUserName.text = user.displayName
-        binding.tvUserEmail.text = user.email
-
-        if (!user.profileImageUrl.isNullOrEmpty()) {
-            Picasso.get()
-                .load(user.profileImageUrl)
-                .placeholder(R.drawable.ic_profile_placeholder)
-                .error(R.drawable.ic_profile_placeholder)
-                .into(binding.ivProfileImage)
-        } else {
-            binding.ivProfileImage.setImageResource(R.drawable.ic_profile_placeholder)
-        }
-    }
-
-    private fun observeMyBooks() {
-        userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            user?.let {
-                bookViewModel.getBooksByOwner(it.id).observe(viewLifecycleOwner) { books ->
-                    updateBooksUI(books)
-                }
-            }
-        }
-    }
-
-    private fun updateBooksUI(books: List<Book>) {
-        myBooksAdapter.submitList(books)
-        if (books.isEmpty()) {
-            binding.rvMyBooks.visibility = View.GONE
-            binding.tvEmptyBooks.visibility = View.VISIBLE
-        } else {
-            binding.rvMyBooks.visibility = View.VISIBLE
-            binding.tvEmptyBooks.visibility = View.GONE
-        }
-    }
-
-    private fun onEditBookClick(book: Book) {
+    private fun navigateToEditProfile() {
         val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-        mainNavController.navigate(
-            R.id.action_main_to_addEditBook,
-            bundleOf("bookId" to book.id)
-        )
+        mainNavController.navigate(R.id.action_main_to_editProfile)
     }
 
-    private fun onDeleteBookClick(book: Book) {
+    private fun navigateToAddBook() {
+        val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+        mainNavController.navigate(R.id.action_main_to_addEditBook)
+    }
+
+    private fun navigateToEditBook(bookId: String) {
+        val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+        val action = com.rebook.app.NavGraphDirections.actionMainToAddEditBook(bookId)
+        mainNavController.navigate(action)
+    }
+
+    private fun showDeleteConfirmation(bookId: String) {
         MaterialAlertDialogBuilder(requireContext())
             .setTitle(R.string.dialog_delete_title)
             .setMessage(R.string.dialog_delete_message)
             .setNegativeButton(R.string.btn_cancel, null)
             .setPositiveButton(R.string.btn_delete) { _, _ ->
-                bookViewModel.deleteBook(book.id)
+                bookViewModel.deleteBook(bookId)
             }
             .show()
     }

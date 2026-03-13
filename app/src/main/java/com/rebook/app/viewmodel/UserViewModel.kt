@@ -1,20 +1,18 @@
 package com.rebook.app.viewmodel
 
-import android.app.Application
 import android.net.Uri
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.asLiveData
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rebook.app.data.model.User
 import com.rebook.app.data.repository.UserRepository
 import com.rebook.app.util.UserOperationState
 import kotlinx.coroutines.launch
 
-class UserViewModel(application: Application) : AndroidViewModel(application) {
+class UserViewModel : ViewModel() {
 
-    private val repository = UserRepository(application)
+    private val repository = UserRepository()
 
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> = _currentUser
@@ -31,10 +29,9 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
 
     fun loadCurrentUser() {
         _currentUser.value = repository.getCurrentUser()
-        viewModelScope.launch {
-            repository.syncCurrentUser()
-        }
     }
+
+    fun getCurrentUserId(): String? = repository.getCurrentUserId()
 
     fun updateProfile(displayName: String, imageUrl: String?) {
         _operationState.value = UserOperationState.Loading
@@ -44,9 +41,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 loadCurrentUser()
                 UserOperationState.Success
             } else {
-                UserOperationState.Error(
-                    result.exceptionOrNull()?.message ?: "Failed to update profile"
-                )
+                UserOperationState.Error(result.exceptionOrNull()?.message ?: "Update failed")
             }
         }
     }
@@ -60,7 +55,7 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 _operationState.value = UserOperationState.Success
             } else {
                 _operationState.value = UserOperationState.Error(
-                    result.exceptionOrNull()?.message ?: "Failed to upload image"
+                    result.exceptionOrNull()?.message ?: "Upload failed"
                 )
             }
         }
