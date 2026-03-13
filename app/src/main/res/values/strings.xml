@@ -24,4 +24,31 @@
     <string name="nav_explore">Explore</string>
     <string name="nav_profile">Profile</string>
     <string name="welcome_message">Welcome to ReBook!</string>
+
+    <!-- Profile -->
+    <string name="btn_edit_profile">Edit Profile</string>
+    <string name="btn_list_new_book">List New Book</string>
+    <string name="label_my_listed_books">My Listed Books</string>
+    <string name="empty_my_books">You haven\'t listed any books yet</string>
+    <string name="status_available">Available</string>
+    <string name="status_requested">Requested</string>
+    <string name="btn_edit">Edit</string>
+    <string name="btn_delete">Delete</string>
+    <string name="btn_save">Save</string>
+    <string name="btn_cancel">Cancel</string>
+
+    <!-- Add/Edit Book -->
+    <string name="title_add_book">Add Book</string>
+    <string name="title_edit_book">Edit Book</string>
+    <string name="hint_book_title">Title</string>
+    <string name="hint_book_author">Author</string>
+    <string name="hint_book_description">Description</string>
+    <string name="label_add_photo">Add Photo</string>
+    <string name="error_empty_title">Title is required</string>
+    <string name="error_empty_author">Author is required</string>
+
+    <!-- Edit Profile -->
+    <string name="title_edit_profile">Edit Profile</string>
+    <string name="hint_display_name">Display Name</string>
+    <string name="label_change_photo">Change Photo</string>
 </resources>
