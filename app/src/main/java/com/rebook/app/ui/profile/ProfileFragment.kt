@@ -140,8 +140,8 @@ class ProfileFragment : Fragment() {
 
     private fun navigateToEditBook(bookId: String) {
         val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-        val action = com.rebook.app.NavGraphDirections.actionMainToAddEditBook(bookId)
-        mainNavController.navigate(action)
+        val bundle = Bundle().apply { putString("bookId", bookId) }
+        mainNavController.navigate(R.id.action_main_to_addEditBook, bundle)
     }
 
     private fun showDeleteConfirmation(bookId: String) {
