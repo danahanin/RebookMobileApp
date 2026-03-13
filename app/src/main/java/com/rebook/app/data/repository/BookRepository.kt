@@ -28,6 +28,9 @@ class BookRepository(context: Context) {
     fun getBooksByOwner(ownerId: String): Flow<List<Book>> =
         bookDao.getBooksByOwner(ownerId).map { entities -> entities.map { Book.fromEntity(it) } }
 
+    suspend fun getBookById(bookId: String): Book? =
+        bookDao.getBookById(bookId)?.let { Book.fromEntity(it) }
+
     suspend fun syncBooksFromFirestore() {
         try {
             val snapshot = booksRef

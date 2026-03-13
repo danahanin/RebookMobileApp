@@ -53,6 +53,9 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
     fun getBooksByOwner(ownerId: String): LiveData<List<Book>> =
         repository.getBooksByOwner(ownerId).asLiveData()
 
+    suspend fun getBookById(bookId: String): Book? =
+        repository.getBookById(bookId)
+
     fun syncBooks() {
         viewModelScope.launch {
             repository.syncBooksFromFirestore()
