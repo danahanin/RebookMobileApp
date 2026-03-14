@@ -49,6 +49,8 @@ class AddEditBookFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         bookId = arguments?.getString("bookId")
+        binding.toolbar.title = if (bookId != null) "Edit Book" else "Add Book"
+        binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         setupClickListeners()
         observeOperationState()
         loadBookIfEditing()

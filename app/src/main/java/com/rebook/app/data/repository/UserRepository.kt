@@ -26,6 +26,33 @@ class UserRepository {
         )
     }
 
+    suspend fun getCurrentUserFromFirestore(): User? {
+        val firebaseUser = auth.currentUser ?: return null
+        return try {
+            val doc = usersRef.document(firebaseUser.uid).get().await()
+            val profileImageUrl = if (doc.exists()) {
+                doc.getString("profileImageUrl") ?: firebaseUser.photoUrl?.toString()
+            } else {
+                firebaseUser.photoUrl?.toString()
+            }
+            val displayName = if (doc.exists()) {
+                doc.getString("displayName")?.takeIf { it.isNotEmpty() }
+                    ?: firebaseUser.displayName ?: ""
+            } else {
+                firebaseUser.displayName ?: ""
+            }
+            User(
+                id = firebaseUser.uid,
+                email = firebaseUser.email ?: "",
+                displayName = displayName,
+                profileImageUrl = profileImageUrl
+            )
+        } catch (e: Exception) {
+            // Fall back to Firebase Auth data if Firestore is unreachable
+            getCurrentUser()
+        }
+    }
+
     fun getCurrentUserId(): String? = auth.currentUser?.uid
 
     suspend fun updateProfile(displayName: String, imageUrl: String?): Result<Unit> {
