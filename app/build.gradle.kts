@@ -74,6 +74,9 @@ dependencies {
     implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
+    // Picasso
+    implementation(libs.picasso)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
