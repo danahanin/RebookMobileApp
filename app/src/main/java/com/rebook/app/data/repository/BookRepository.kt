@@ -16,6 +16,10 @@ import java.util.UUID
 
 class BookRepository(context: Context) {
 
+    companion object {
+        private const val SYNC_LIMIT = 50L
+    }
+
     private val bookDao = AppDatabase.getInstance(context).bookDao()
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -35,7 +39,7 @@ class BookRepository(context: Context) {
         try {
             val snapshot = booksRef
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(50)
+                .limit(SYNC_LIMIT)
                 .get()
                 .await()
             val entities = snapshot.documents.mapNotNull { doc ->

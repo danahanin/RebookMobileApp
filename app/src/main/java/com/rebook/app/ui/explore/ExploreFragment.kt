@@ -42,6 +42,9 @@ class ExploreFragment : Fragment() {
         observeOperationState()
         setupSearch()
         bookViewModel.syncBooks()
+        binding.swipeRefresh.setOnRefreshListener {
+            bookViewModel.syncBooks { binding.swipeRefresh.isRefreshing = false }
+        }
         setupFilterButton()
     }
 
