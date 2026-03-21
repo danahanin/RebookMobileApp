@@ -3,6 +3,8 @@ package com.rebook.app.data.repository
 import android.content.Context
 import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
@@ -15,6 +17,10 @@ import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
 class BookRepository(context: Context) {
+
+    companion object {
+        private const val SYNC_LIMIT = 50L
+    }
 
     private val bookDao = AppDatabase.getInstance(context).bookDao()
     private val firestore = FirebaseFirestore.getInstance()
@@ -35,22 +41,28 @@ class BookRepository(context: Context) {
         try {
             val snapshot = booksRef
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(50)
+                .limit(SYNC_LIMIT)
                 .get()
                 .await()
             val entities = snapshot.documents.mapNotNull { doc ->
-                val data = doc.data ?: return@mapNotNull null
+                val ownerId = doc.getString("ownerId").orEmpty()
+                if (ownerId.isEmpty()) {
+                    android.util.Log.w(
+                        "BookRepository",
+                        "Sync: book ${doc.id} has missing or blank ownerId"
+                    )
+                }
                 com.rebook.app.data.local.entity.BookEntity(
                     id = doc.id,
-                    title = data["title"] as? String ?: "",
-                    author = data["author"] as? String ?: "",
-                    description = data["description"] as? String ?: "",
-                    imageUrl = data["imageUrl"] as? String,
-                    ownerId = data["ownerId"] as? String ?: "",
-                    ownerName = data["ownerName"] as? String ?: "",
-                    status = data["status"] as? String ?: "AVAILABLE",
-                    requestedById = data["requestedById"] as? String,
-                    createdAt = data["createdAt"] as? Long ?: 0L
+                    title = doc.getString("title").orEmpty(),
+                    author = doc.getString("author").orEmpty(),
+                    description = doc.getString("description").orEmpty(),
+                    imageUrl = doc.getString("imageUrl"),
+                    ownerId = ownerId,
+                    ownerName = doc.getString("ownerName").orEmpty(),
+                    status = doc.getString("status") ?: "AVAILABLE",
+                    requestedById = doc.getString("requestedById"),
+                    createdAt = doc.readCreatedAtMillis()
                 )
             }
             bookDao.insertBooks(entities)
@@ -177,5 +189,15 @@ class BookRepository(context: Context) {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+}
+
+private fun DocumentSnapshot.readCreatedAtMillis(): Long {
+    val v = get("createdAt") ?: return 0L
+    return when (v) {
+        is Long -> v
+        is Number -> v.toLong()
+        is Timestamp -> v.toDate().time
+        else -> 0L
     }
 }

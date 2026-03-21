@@ -12,6 +12,7 @@ import com.rebook.app.databinding.ItemMyBookBinding
 import com.squareup.picasso.Picasso
 
 class MyBooksAdapter(
+    private val onMessagesClick: (Book) -> Unit,
     private val onEditClick: (Book) -> Unit,
     private val onDeleteClick: (Book) -> Unit
 ) : ListAdapter<Book, MyBooksAdapter.MyBookViewHolder>(MyBookDiffCallback()) {
@@ -36,6 +37,7 @@ class MyBooksAdapter(
             loadBookImage(book.imageUrl)
             setStatusBadge(book.status)
 
+            binding.btnMessages.setOnClickListener { onMessagesClick(book) }
             binding.btnEdit.setOnClickListener { onEditClick(book) }
             binding.btnDelete.setOnClickListener { onDeleteClick(book) }
         }

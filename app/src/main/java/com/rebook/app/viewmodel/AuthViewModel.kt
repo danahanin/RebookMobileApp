@@ -5,12 +5,14 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rebook.app.data.repository.AuthRepository
+import com.rebook.app.data.repository.UserRepository
 import com.rebook.app.util.AuthState
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
 
     private val repository = AuthRepository()
+    private val userRepository = UserRepository()
 
     private val _authState = MutableLiveData<AuthState>(AuthState.Idle)
     val authState: LiveData<AuthState> = _authState
@@ -22,6 +24,9 @@ class AuthViewModel : ViewModel() {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             val result = repository.login(email, password)
+            if (result.isSuccess) {
+                userRepository.syncUserDocumentFromAuth()
+            }
             _authState.value = if (result.isSuccess) {
                 AuthState.Success(result.getOrThrow())
             } else {
@@ -34,6 +39,9 @@ class AuthViewModel : ViewModel() {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             val result = repository.register(email, password, displayName)
+            if (result.isSuccess) {
+                userRepository.syncUserDocumentFromAuth()
+            }
             _authState.value = if (result.isSuccess) {
                 AuthState.Success(result.getOrThrow())
             } else {

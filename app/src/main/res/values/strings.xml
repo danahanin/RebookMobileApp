@@ -50,6 +50,19 @@
     <string name="error_empty_title">Title is required</string>
     <string name="error_empty_author">Author is required</string>
 
+    <!-- Messages -->
+    <string name="messages_screen_title">Messages</string>
+    <string name="messages_stub_body">Message thread will appear here.</string>
+    <string name="hint_message">Write a message…</string>
+    <string name="send_message">Send</string>
+    <string name="empty_messages">No messages yet. Say hello!</string>
+    <string name="error_messages_listen">Could not load messages.</string>
+    <string name="back">Back</string>
+    <string name="btn_send_message_to_owner">Send Message to Owner</string>
+    <string name="btn_book_message_threads">Messages</string>
+    <string name="chat_threads_title">Conversations</string>
+    <string name="empty_chat_threads">No conversations yet. Buyers will appear here after they message you.</string>
+
     <!-- Edit Profile -->
     <string name="title_edit_profile">Edit Profile</string>
     <string name="hint_display_name">Display Name</string>

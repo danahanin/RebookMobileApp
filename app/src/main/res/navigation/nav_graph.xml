@@ -69,6 +69,43 @@
         <action
             android:id="@+id/action_bookDetails_to_addEditBook"
             app:destination="@id/addEditBookFragment" />
+        <action
+            android:id="@+id/action_bookDetails_to_bookMessage"
+            app:destination="@id/bookMessageFragment" />
+        <action
+            android:id="@+id/action_bookDetails_to_bookChatList"
+            app:destination="@id/bookChatListFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bookChatListFragment"
+        android:name="com.rebook.app.ui.book.BookChatListFragment"
+        android:label="Conversations"
+        tools:layout="@layout/fragment_book_chat_list">
+        <argument
+            android:name="bookId"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_bookChatList_to_bookMessage"
+            app:destination="@id/bookMessageFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bookMessageFragment"
+        android:name="com.rebook.app.ui.book.BookMessageFragment"
+        android:label="Messages"
+        tools:layout="@layout/fragment_book_message">
+        <argument
+            android:name="bookId"
+            app:argType="string" />
+        <argument
+            android:name="chatBuyerUid"
+            app:argType="string" />
+        <argument
+            android:name="partnerDisplayName"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" />
     </fragment>
 
     <fragment

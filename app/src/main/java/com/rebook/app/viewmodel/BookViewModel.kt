@@ -77,9 +77,13 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun getBookById(bookId: String): Book? =
         repository.getBookById(bookId)
 
-    fun syncBooks() {
+    fun syncBooks(onFinished: (() -> Unit)? = null) {
         viewModelScope.launch {
-            repository.syncBooksFromFirestore()
+            try {
+                repository.syncBooksFromFirestore()
+            } finally {
+                onFinished?.invoke()
+            }
         }
     }
 

@@ -4,6 +4,7 @@ import android.net.Uri
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import com.google.firebase.storage.FirebaseStorage
 import com.rebook.app.data.model.User
 import kotlinx.coroutines.tasks.await
@@ -54,6 +55,33 @@ class UserRepository {
     }
 
     fun getCurrentUserId(): String? = auth.currentUser?.uid
+
+    suspend fun syncUserDocumentFromAuth(): Result<Unit> {
+        val user = auth.currentUser ?: return Result.success(Unit)
+        return try {
+            usersRef.document(user.uid).set(
+                mapOf(
+                    "displayName" to (user.displayName ?: ""),
+                    "email" to (user.email ?: "")
+                ),
+                SetOptions.merge()
+            ).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun getDisplayNameForUser(uid: String): String? {
+        return try {
+            val doc = usersRef.document(uid).get().await()
+            if (!doc.exists()) return null
+            doc.getString("displayName")?.takeIf { it.isNotEmpty() }
+                ?: doc.getString("email")?.substringBefore("@")?.takeIf { it.isNotEmpty() }
+        } catch (e: Exception) {
+            null
+        }
+    }
 
     suspend fun updateProfile(displayName: String, imageUrl: String?): Result<Unit> {
         return try {

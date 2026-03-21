@@ -76,9 +76,16 @@ class BookDetailsFragment : Fragment() {
 
             if (isOwnBook) {
                 requestBtn.visibility = View.GONE
-                messageBtn.visibility = View.GONE
+                messageBtn.visibility = View.VISIBLE
+                messageBtn.text = getString(R.string.btn_book_message_threads)
+                messageBtn.setOnClickListener {
+                    findNavController().navigate(
+                        BookDetailsFragmentDirections.actionBookDetailsToBookChatList(book.id)
+                    )
+                }
             } else {
                 messageBtn.visibility = View.VISIBLE
+                messageBtn.text = getString(R.string.btn_send_message_to_owner)
 
                 when {
                     book.status == BookStatus.AVAILABLE -> {
@@ -111,9 +118,19 @@ class BookDetailsFragment : Fragment() {
                     }
                 }
 
+                val uid = currentUserId
                 messageBtn.setOnClickListener {
-                    // TODO Milestone 3 Person B: navigate to messaging screen
-                    Toast.makeText(requireContext(), "Messaging coming soon!", Toast.LENGTH_SHORT).show()
+                    if (uid != null) {
+                        findNavController().navigate(
+                            BookDetailsFragmentDirections.actionBookDetailsToBookMessage(
+                                book.id,
+                                uid,
+                                null
+                            )
+                        )
+                    } else {
+                        Toast.makeText(requireContext(), R.string.error_generic, Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
         }

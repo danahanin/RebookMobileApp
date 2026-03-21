@@ -1,16 +1,20 @@
 package com.rebook.app.ui.profile
 
 import android.os.Bundle
+import androidx.core.os.bundleOf
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.switchMap
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.rebook.app.R
+import com.rebook.app.data.model.Book
 import com.rebook.app.databinding.FragmentProfileBinding
 import com.rebook.app.util.BookOperationState
 import com.rebook.app.viewmodel.AuthViewModel
@@ -50,10 +54,12 @@ class ProfileFragment : Fragment() {
     override fun onResume() {
         super.onResume()
         userViewModel.loadCurrentUser()
+        bookViewModel.syncBooks()
     }
 
     private fun setupRecyclerView() {
         myBooksAdapter = MyBooksAdapter(
+            onMessagesClick = { book -> navigateToBookMessages(book.id) },
             onEditClick = { book -> navigateToEditBook(book.id) },
             onDeleteClick = { book -> showDeleteConfirmation(book.id) }
         )
@@ -86,11 +92,19 @@ class ProfileFragment : Fragment() {
     }
 
     private fun observeMyBooks() {
-        val userId = userViewModel.getCurrentUserId() ?: return
-        bookViewModel.getBooksByOwner(userId).observe(viewLifecycleOwner) { books ->
-            myBooksAdapter.submitList(books)
-            binding.tvEmptyBooks.visibility = if (books.isEmpty()) View.VISIBLE else View.GONE
-            binding.rvMyBooks.visibility = if (books.isEmpty()) View.GONE else View.VISIBLE
+        val booksLiveData = userViewModel.currentUser.switchMap { user ->
+            val id = user?.id
+            if (id == null) {
+                MutableLiveData<List<Book>>(emptyList())
+            } else {
+                bookViewModel.getBooksByOwner(id)
+            }
+        }
+        booksLiveData.observe(viewLifecycleOwner) { books ->
+            val list = books ?: emptyList()
+            myBooksAdapter.submitList(list)
+            binding.tvEmptyBooks.visibility = if (list.isEmpty()) View.VISIBLE else View.GONE
+            binding.rvMyBooks.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
         }
     }
 
@@ -136,6 +150,11 @@ class ProfileFragment : Fragment() {
     private fun navigateToAddBook() {
         val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
         mainNavController.navigate(R.id.action_main_to_addEditBook)
+    }
+
+    private fun navigateToBookMessages(bookId: String) {
+        val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
+        mainNavController.navigate(R.id.bookChatListFragment, bundleOf("bookId" to bookId))
     }
 
     private fun navigateToEditBook(bookId: String) {
