@@ -28,7 +28,9 @@ class UserViewModel : ViewModel() {
     }
 
     fun loadCurrentUser() {
-        _currentUser.value = repository.getCurrentUser()
+        viewModelScope.launch {
+            _currentUser.value = repository.getCurrentUserFromFirestore()
+        }
     }
 
     fun getCurrentUserId(): String? = repository.getCurrentUserId()

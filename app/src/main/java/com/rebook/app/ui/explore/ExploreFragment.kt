@@ -5,10 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
+import androidx.core.os.bundleOf
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.rebook.app.R
+import com.rebook.app.data.model.BookStatus
 import com.rebook.app.databinding.FragmentExploreBinding
 import com.rebook.app.util.BookOperationState
 import com.rebook.app.viewmodel.BookViewModel
@@ -37,6 +42,7 @@ class ExploreFragment : Fragment() {
         observeOperationState()
         setupSearch()
         bookViewModel.syncBooks()
+        setupFilterButton()
     }
 
     private fun setupRecyclerView() {
@@ -48,7 +54,13 @@ class ExploreFragment : Fragment() {
                 bookViewModel.unrequestBook(book.id)
             },
             onBookClick = { book ->
-                // TODO: navigate to BookDetailsFragment with book.id
+                val outerNavController = Navigation.findNavController(
+                    requireActivity(), R.id.nav_host_fragment
+                )
+                outerNavController.navigate(
+                    R.id.bookDetailsFragment,
+                    bundleOf("bookId" to book.id)
+                )
             }
         )
         binding.rvBooks.apply {
@@ -87,6 +99,25 @@ class ExploreFragment : Fragment() {
     private fun setupSearch() {
         binding.etSearch.doAfterTextChanged { text ->
             bookViewModel.setSearchQuery(text?.toString() ?: "")
+        }
+    }
+
+    private fun setupFilterButton() {
+        val options = arrayOf("All books", "Available only")
+        binding.btnFilter.setOnClickListener {
+            val currentFilter = bookViewModel.statusFilter.value
+            val checkedItem = if (currentFilter == BookStatus.AVAILABLE) 1 else 0
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Filter books")
+                .setSingleChoiceItems(options, checkedItem) { dialog, which ->
+                    when (which) {
+                        0 -> bookViewModel.setStatusFilter(null)
+                        1 -> bookViewModel.setStatusFilter(BookStatus.AVAILABLE)
+                    }
+                    dialog.dismiss()
+                }
+                .show()
         }
     }
 
