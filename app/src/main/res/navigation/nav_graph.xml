@@ -69,6 +69,19 @@
         <action
             android:id="@+id/action_bookDetails_to_addEditBook"
             app:destination="@id/addEditBookFragment" />
+        <action
+            android:id="@+id/action_bookDetails_to_bookMessage"
+            app:destination="@id/bookMessageFragment" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/bookMessageFragment"
+        android:name="com.rebook.app.ui.book.BookMessageFragment"
+        android:label="Messages"
+        tools:layout="@layout/fragment_book_message">
+        <argument
+            android:name="bookId"
+            app:argType="string" />
     </fragment>
 
     <fragment
