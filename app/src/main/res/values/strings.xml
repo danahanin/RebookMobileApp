@@ -53,6 +53,10 @@
     <!-- Messages -->
     <string name="messages_screen_title">Messages</string>
     <string name="messages_stub_body">Message thread will appear here.</string>
+    <string name="hint_message">Write a message…</string>
+    <string name="send_message">Send</string>
+    <string name="empty_messages">No messages yet. Say hello!</string>
+    <string name="error_messages_listen">Could not load messages.</string>
     <string name="back">Back</string>
 
     <!-- Edit Profile -->

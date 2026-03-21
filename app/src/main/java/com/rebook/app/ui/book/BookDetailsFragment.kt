@@ -112,8 +112,9 @@ class BookDetailsFragment : Fragment() {
                 }
 
                 messageBtn.setOnClickListener {
-                    // TODO Milestone 3 Person B: navigate to messaging screen
-                    Toast.makeText(requireContext(), "Messaging coming soon!", Toast.LENGTH_SHORT).show()
+                    findNavController().navigate(
+                        BookDetailsFragmentDirections.actionBookDetailsToBookMessage(book.id)
+                    )
                 }
             }
         }
