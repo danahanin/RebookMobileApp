@@ -2,9 +2,12 @@ package com.rebook.app
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.google.firebase.auth.FirebaseAuth
+import com.rebook.app.data.repository.UserRepository
 import com.rebook.app.databinding.ActivityMainBinding
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,5 +29,11 @@ class MainActivity : AppCompatActivity() {
             else R.id.loginFragment
         )
         navController.graph = navGraph
+
+        if (FirebaseAuth.getInstance().currentUser != null) {
+            lifecycleScope.launch {
+                UserRepository().syncUserDocumentFromAuth()
+            }
+        }
     }
 }

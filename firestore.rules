@@ -18,17 +18,29 @@ service cloud.firestore {
         || requestAllowedForBook(resource.data, request.resource.data)
       );
 
-      match /messages/{messageId} {
-        allow read: if request.auth != null && (
-          resource.data.senderId == request.auth.uid
-          || get(/databases/$(database)/documents/books/$(bookId)).data.ownerId == request.auth.uid
-        );
-        allow create: if request.auth != null
-          && request.resource.data.senderId == request.auth.uid
-          && request.resource.data.keys().hasAll(['senderId', 'text', 'createdAt']);
+      match /chats/{buyerId} {
+        allow read: if request.auth != null && chatParticipantAllowed(bookId, buyerId);
+        allow create, update: if request.auth != null && chatParticipantAllowed(bookId, buyerId);
+
+        match /messages/{messageId} {
+          allow read: if request.auth != null && chatParticipantAllowed(bookId, buyerId);
+          allow create: if request.auth != null
+            && chatParticipantAllowed(bookId, buyerId)
+            && request.resource.data.senderId == request.auth.uid
+            && request.resource.data.keys().hasAll(['senderId', 'text', 'createdAt']);
+        }
       }
     }
   }
+}
+
+function bookOwnerUid(bookId) {
+  return get(/databases/$(database)/documents/books/$(bookId)).data.ownerId;
+}
+
+function chatParticipantAllowed(bookId, buyerId) {
+  return request.auth.uid == buyerId
+    || bookOwnerUid(bookId) == request.auth.uid;
 }
 
 function requestAllowedForBook(before, after) {

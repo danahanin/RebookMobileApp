@@ -68,6 +68,16 @@
             android:layout_gravity="center_vertical">
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_messages"
+                style="@style/Widget.Material3.Button.TextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="@string/btn_book_message_threads"
+                android:textSize="12sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="8dp" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_edit"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"

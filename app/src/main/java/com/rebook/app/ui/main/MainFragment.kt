@@ -5,7 +5,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.NavHostFragment
+import com.rebook.app.viewmodel.BookViewModel
 import androidx.navigation.ui.setupWithNavController
 import com.rebook.app.R
 import com.rebook.app.databinding.FragmentMainBinding
@@ -14,6 +16,8 @@ class MainFragment : Fragment() {
 
     private var _binding: FragmentMainBinding? = null
     private val binding get() = _binding!!
+
+    private val bookViewModel: BookViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -30,6 +34,11 @@ class MainFragment : Fragment() {
             .findFragmentById(R.id.nav_host_fragment_main) as NavHostFragment
         val navController = navHostFragment.navController
         binding.bottomNavigation.setupWithNavController(navController)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        bookViewModel.syncBooks()
     }
 
     override fun onDestroyView() {

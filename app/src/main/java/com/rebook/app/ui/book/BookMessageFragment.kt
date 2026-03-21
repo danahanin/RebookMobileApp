@@ -11,12 +11,17 @@ import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.auth.FirebaseAuth
+import com.rebook.app.data.repository.UserRepository
 import com.rebook.app.databinding.FragmentBookMessageBinding
 import com.rebook.app.viewmodel.BookViewModel
 import com.rebook.app.viewmodel.MessageSendState
 import com.rebook.app.viewmodel.MessageViewModel
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 
 class BookMessageFragment : Fragment() {
 
@@ -26,6 +31,9 @@ class BookMessageFragment : Fragment() {
     private val args: BookMessageFragmentArgs by navArgs()
     private val bookViewModel: BookViewModel by activityViewModels()
     private val messageViewModel: MessageViewModel by viewModels()
+
+    private val userRepository = UserRepository()
+    private var subtitleResolveJob: Job? = null
 
     private lateinit var messageAdapter: MessageListAdapter
 
@@ -42,7 +50,8 @@ class BookMessageFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val bookId = args.bookId
-        if (bookId.isBlank()) {
+        val chatBuyerUid = args.chatBuyerUid
+        if (bookId.isBlank() || chatBuyerUid.isBlank()) {
             findNavController().popBackStack()
             return
         }
@@ -53,11 +62,34 @@ class BookMessageFragment : Fragment() {
 
         bookViewModel.loadBook(bookId)
         bookViewModel.selectedBook.observe(viewLifecycleOwner) { book ->
-            if (book != null) {
-                val owner = book.ownerName.ifBlank { "Unknown" }
-                binding.toolbar.subtitle = "${book.title} · $owner"
-            } else {
+            subtitleResolveJob?.cancel()
+            if (book == null) {
                 binding.toolbar.subtitle = null
+                return@observe
+            }
+            val uid = FirebaseAuth.getInstance().currentUser?.uid
+            when {
+                uid == null ->
+                    binding.toolbar.subtitle =
+                        "${book.title} · ${book.ownerName.ifBlank { "Unknown" }}"
+                book.ownerId == uid -> {
+                    val preset = args.partnerDisplayName?.takeIf { it.isNotBlank() }
+                    if (preset != null) {
+                        binding.toolbar.subtitle = "${book.title} · $preset"
+                    } else {
+                        binding.toolbar.subtitle = "${book.title} · …"
+                        subtitleResolveJob = viewLifecycleOwner.lifecycleScope.launch {
+                            val name = userRepository.getDisplayNameForUser(chatBuyerUid)
+                            val label = name ?: "Reader · ${chatBuyerUid.take(8)}"
+                            if (viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) {
+                                binding.toolbar.subtitle = "${book.title} · $label"
+                            }
+                        }
+                    }
+                }
+                else ->
+                    binding.toolbar.subtitle =
+                        "${book.title} · ${book.ownerName.ifBlank { "Owner" }}"
             }
         }
 
@@ -67,7 +99,7 @@ class BookMessageFragment : Fragment() {
         }
         binding.recyclerMessages.adapter = messageAdapter
 
-        messageViewModel.startListening(bookId)
+        messageViewModel.startListening(bookId, chatBuyerUid)
 
         messageViewModel.messages.observe(viewLifecycleOwner) { list ->
             messageAdapter.submitList(list) {
@@ -116,7 +148,7 @@ class BookMessageFragment : Fragment() {
 
         binding.btnSend.setOnClickListener {
             val text = binding.etMessage.text?.toString().orEmpty()
-            messageViewModel.sendMessage(bookId, text)
+            messageViewModel.sendMessage(bookId, chatBuyerUid, text)
         }
     }
 

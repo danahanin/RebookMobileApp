@@ -36,14 +36,14 @@ class MessageViewModel(application: Application) : AndroidViewModel(application)
 
     private var listenJob: Job? = null
 
-    fun startListening(bookId: String) {
-        if (bookId.isBlank()) return
+    fun startListening(bookId: String, chatBuyerUid: String) {
+        if (bookId.isBlank() || chatBuyerUid.isBlank()) return
         listenJob?.cancel()
         _listLoading.postValue(true)
         _listenError.postValue(null)
         listenJob = viewModelScope.launch {
             try {
-                repository.observeMessages(bookId).collect { list ->
+                repository.observeMessages(bookId, chatBuyerUid).collect { list ->
                     _listLoading.postValue(false)
                     _messages.postValue(list)
                 }
@@ -56,10 +56,10 @@ class MessageViewModel(application: Application) : AndroidViewModel(application)
         }
     }
 
-    fun sendMessage(bookId: String, text: String) {
+    fun sendMessage(bookId: String, chatBuyerUid: String, text: String) {
         viewModelScope.launch {
             _sendState.value = MessageSendState.Loading
-            val result = repository.sendMessage(bookId, text)
+            val result = repository.sendMessage(bookId, chatBuyerUid, text)
             _sendState.value = if (result.isSuccess) {
                 MessageSendState.Success
             } else {
