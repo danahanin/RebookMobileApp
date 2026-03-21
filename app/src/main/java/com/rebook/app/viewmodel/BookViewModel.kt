@@ -1,6 +1,7 @@
 package com.rebook.app.viewmodel
 
 import android.app.Application
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
@@ -52,6 +53,9 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getBooksByOwner(ownerId: String): LiveData<List<Book>> =
         repository.getBooksByOwner(ownerId).asLiveData()
+
+    suspend fun getBookById(bookId: String): Book? =
+        repository.getBookById(bookId)
 
     fun syncBooks() {
         viewModelScope.launch {
@@ -121,5 +125,27 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
 
     fun resetOperationState() {
         _operationState.value = BookOperationState.Idle
+    }
+
+    private val _uploadedImageUrl = MutableLiveData<String?>()
+    val uploadedImageUrl: LiveData<String?> = _uploadedImageUrl
+
+    fun uploadBookImage(imageUri: Uri) {
+        _operationState.value = BookOperationState.Loading
+        viewModelScope.launch {
+            val result = repository.uploadBookImage(imageUri)
+            if (result.isSuccess) {
+                _uploadedImageUrl.value = result.getOrNull()
+                _operationState.value = BookOperationState.Idle
+            } else {
+                _operationState.value = BookOperationState.Error(
+                    result.exceptionOrNull()?.message ?: "Upload failed"
+                )
+            }
+        }
+    }
+
+    fun clearUploadedImageUrl() {
+        _uploadedImageUrl.value = null
     }
 }

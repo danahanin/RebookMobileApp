@@ -77,6 +77,9 @@ dependencies {
     // Picasso
     implementation(libs.picasso)
 
+    // CircleImageView
+    implementation(libs.circle.imageview)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
