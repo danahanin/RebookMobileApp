@@ -50,6 +50,11 @@
     <string name="error_empty_title">Title is required</string>
     <string name="error_empty_author">Author is required</string>
 
+    <!-- Messages -->
+    <string name="messages_screen_title">Messages</string>
+    <string name="messages_stub_body">Message thread will appear here.</string>
+    <string name="back">Back</string>
+
     <!-- Edit Profile -->
     <string name="title_edit_profile">Edit Profile</string>
     <string name="hint_display_name">Display Name</string>
