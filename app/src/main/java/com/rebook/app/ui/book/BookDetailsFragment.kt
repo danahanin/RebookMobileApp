@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.rebook.app.R
 import com.rebook.app.data.model.BookStatus
@@ -71,6 +72,7 @@ class BookDetailsFragment : Fragment() {
             val isOwnBook = book.ownerId == currentUserId
             val isRequestedByMe = book.requestedById == currentUserId
 
+            val approveBtn = binding.btnApprove
             val requestBtn = binding.btnRequest
             val messageBtn = binding.btnMessage
 
@@ -83,7 +85,24 @@ class BookDetailsFragment : Fragment() {
                         BookDetailsFragmentDirections.actionBookDetailsToBookChatList(book.id)
                     )
                 }
+
+                if (book.status == BookStatus.REQUESTED) {
+                    approveBtn.visibility = View.VISIBLE
+                    approveBtn.setOnClickListener {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle(R.string.dialog_approve_title)
+                            .setMessage(R.string.dialog_approve_message)
+                            .setNegativeButton(R.string.btn_cancel, null)
+                            .setPositiveButton(R.string.btn_approve_request) { _, _ ->
+                                bookViewModel.approveRequest(book.id)
+                            }
+                            .show()
+                    }
+                } else {
+                    approveBtn.visibility = View.GONE
+                }
             } else {
+                approveBtn.visibility = View.GONE
                 messageBtn.visibility = View.VISIBLE
                 messageBtn.text = getString(R.string.btn_send_message_to_owner)
 
@@ -106,6 +125,13 @@ class BookDetailsFragment : Fragment() {
                             bookViewModel.unrequestBook(book.id)
                         }
                     }
+                    book.status == BookStatus.LENT && isRequestedByMe -> {
+                        requestBtn.visibility = View.VISIBLE
+                        requestBtn.isEnabled = false
+                        requestBtn.text = getString(R.string.status_approved)
+                        requestBtn.setBackgroundColor(requireContext().getColor(R.color.blue_secondary))
+                        requestBtn.setOnClickListener(null)
+                    }
                     book.status == BookStatus.REQUESTED -> {
                         requestBtn.visibility = View.VISIBLE
                         requestBtn.isEnabled = false
@@ -114,7 +140,12 @@ class BookDetailsFragment : Fragment() {
                         requestBtn.setOnClickListener(null)
                     }
                     else -> {
-                        requestBtn.visibility = View.GONE
+                        // LENT to someone else — show Unavailable
+                        requestBtn.visibility = View.VISIBLE
+                        requestBtn.isEnabled = false
+                        requestBtn.text = getString(R.string.status_unavailable)
+                        requestBtn.setBackgroundColor(requireContext().getColor(android.R.color.darker_gray))
+                        requestBtn.setOnClickListener(null)
                     }
                 }
 
@@ -141,19 +172,21 @@ class BookDetailsFragment : Fragment() {
             when (state) {
                 is BookOperationState.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
+                    binding.btnApprove.isEnabled = false
                     binding.btnRequest.isEnabled = false
                     binding.btnMessage.isEnabled = false
                 }
                 is BookOperationState.Success -> {
                     binding.progressBar.visibility = View.GONE
+                    binding.btnApprove.isEnabled = true
                     binding.btnRequest.isEnabled = true
                     binding.btnMessage.isEnabled = true
                     bookViewModel.resetOperationState()
-                    // Reload the book to reflect updated status
                     bookViewModel.loadBook(bookId)
                 }
                 is BookOperationState.Error -> {
                     binding.progressBar.visibility = View.GONE
+                    binding.btnApprove.isEnabled = true
                     binding.btnRequest.isEnabled = true
                     binding.btnMessage.isEnabled = true
                     Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()

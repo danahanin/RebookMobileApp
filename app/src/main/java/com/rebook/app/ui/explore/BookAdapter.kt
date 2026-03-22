@@ -84,8 +84,21 @@ class BookAdapter(
                     btn.setBackgroundColor(binding.root.context.getColor(android.R.color.darker_gray))
                     btn.setOnClickListener(null)
                 }
+                book.status == BookStatus.LENT && isRequestedByMe -> {
+                    // My request was approved — blue Approved badge
+                    btn.visibility = android.view.View.VISIBLE
+                    btn.isEnabled = false
+                    btn.text = binding.root.context.getString(R.string.status_approved)
+                    btn.setBackgroundColor(binding.root.context.getColor(R.color.blue_secondary))
+                    btn.setOnClickListener(null)
+                }
                 else -> {
-                    btn.visibility = android.view.View.GONE
+                    // LENT to someone else — show Unavailable
+                    btn.visibility = android.view.View.VISIBLE
+                    btn.isEnabled = false
+                    btn.text = binding.root.context.getString(R.string.status_unavailable)
+                    btn.setBackgroundColor(binding.root.context.getColor(android.R.color.darker_gray))
+                    btn.setOnClickListener(null)
                 }
             }
 

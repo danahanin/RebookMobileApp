@@ -101,6 +101,16 @@
                 android:layout_marginBottom="16dp" />
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_approve"
+                style="@style/Widget.Material3.Button"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="@string/btn_approve_request"
+                android:textSize="15sp"
+                android:layout_marginBottom="12dp"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_request"
                 style="@style/Widget.Material3.Button"
                 android:layout_width="match_parent"
