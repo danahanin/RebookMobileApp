@@ -154,6 +154,19 @@ class BookRepository(context: Context) {
         }
     }
 
+    suspend fun approveRequest(bookId: String): Result<Unit> {
+        return try {
+            booksRef.document(bookId).update("status", BookStatus.LENT.name).await()
+            val cached = bookDao.getBookById(bookId)
+            if (cached != null) {
+                bookDao.updateBook(cached.copy(status = BookStatus.LENT.name))
+            }
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun unrequestBook(bookId: String): Result<Unit> {
         return try {
             val updates = mapOf(
