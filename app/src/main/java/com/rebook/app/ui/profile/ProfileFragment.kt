@@ -59,6 +59,7 @@ class ProfileFragment : Fragment() {
 
     private fun setupRecyclerView() {
         myBooksAdapter = MyBooksAdapter(
+            onApproveClick = { book -> showApproveConfirmation(book.id) },
             onMessagesClick = { book -> navigateToBookMessages(book.id) },
             onEditClick = { book -> navigateToEditBook(book.id) },
             onDeleteClick = { book -> showDeleteConfirmation(book.id) }
@@ -161,6 +162,17 @@ class ProfileFragment : Fragment() {
         val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
         val bundle = Bundle().apply { putString("bookId", bookId) }
         mainNavController.navigate(R.id.action_main_to_addEditBook, bundle)
+    }
+
+    private fun showApproveConfirmation(bookId: String) {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle(R.string.dialog_approve_title)
+            .setMessage(R.string.dialog_approve_message)
+            .setNegativeButton(R.string.btn_cancel, null)
+            .setPositiveButton(R.string.btn_approve_request) { _, _ ->
+                bookViewModel.approveRequest(bookId)
+            }
+            .show()
     }
 
     private fun showDeleteConfirmation(bookId: String) {
