@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.rebook.app.R
 import com.rebook.app.data.model.BookStatus
 import com.rebook.app.databinding.FragmentExploreBinding
-import com.rebook.app.util.BookOperationState
+import com.rebook.app.util.observeBookOperations
 import com.rebook.app.viewmodel.BookViewModel
 
 class ExploreFragment : Fragment() {
@@ -97,22 +97,11 @@ class ExploreFragment : Fragment() {
     }
 
     private fun observeOperationState() {
-        bookViewModel.operationState.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is BookOperationState.Loading -> binding.progressBar.visibility = View.VISIBLE
-                is BookOperationState.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    bookViewModel.syncBooks()
-                    bookViewModel.resetOperationState()
-                }
-                is BookOperationState.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
-                    bookViewModel.resetOperationState()
-                }
-                is BookOperationState.Idle -> binding.progressBar.visibility = View.GONE
-            }
-        }
+        observeBookOperations(bookViewModel, { show ->
+            binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
+        }, onSuccess = {
+            bookViewModel.syncBooks()
+        })
     }
 
     private fun setupSearch() {
@@ -123,18 +112,21 @@ class ExploreFragment : Fragment() {
 
     private fun observeStatusFilter() {
         bookViewModel.statusFilter.observe(viewLifecycleOwner) { filter ->
-            binding.tvSectionTitle.text = if (filter == BookStatus.AVAILABLE) "Books Available" else "All Books"
+            binding.tvSectionTitle.text = getString(
+                if (filter == BookStatus.AVAILABLE) R.string.title_books_available
+                else R.string.title_all_books
+            )
         }
     }
 
     private fun setupFilterButton() {
-        val options = arrayOf("All books", "Available only")
+        val options = arrayOf(getString(R.string.filter_all_books), getString(R.string.filter_available_only))
         binding.btnFilter.setOnClickListener {
             val currentFilter = bookViewModel.statusFilter.value
             val checkedItem = if (currentFilter == BookStatus.AVAILABLE) 1 else 0
 
             AlertDialog.Builder(requireContext())
-                .setTitle("Filter books")
+                .setTitle(R.string.title_filter_books)
                 .setSingleChoiceItems(options, checkedItem) { dialog, which ->
                     when (which) {
                         0 -> bookViewModel.setStatusFilter(null)

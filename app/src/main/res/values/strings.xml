@@ -69,6 +69,13 @@
     <string name="chat_threads_title">Conversations</string>
     <string name="empty_chat_threads">No conversations yet. Buyers will appear here after they message you.</string>
 
+    <!-- Explore -->
+    <string name="title_all_books">All Books</string>
+    <string name="title_books_available">Books Available</string>
+    <string name="title_filter_books">Filter books</string>
+    <string name="filter_all_books">All books</string>
+    <string name="filter_available_only">Available only</string>
+
     <!-- Edit Profile -->
     <string name="title_edit_profile">Edit Profile</string>
     <string name="hint_display_name">Display Name</string>
