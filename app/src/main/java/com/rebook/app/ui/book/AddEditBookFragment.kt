@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.rebook.app.R
 import com.rebook.app.data.model.Book
 import com.rebook.app.databinding.FragmentAddEditBookBinding
@@ -25,6 +26,7 @@ class AddEditBookFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val bookViewModel: BookViewModel by activityViewModels()
+    private val args: AddEditBookFragmentArgs by navArgs()
 
     private var bookId: String? = null
     private var existingBook: Book? = null
@@ -49,7 +51,7 @@ class AddEditBookFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bookId = arguments?.getString("bookId")
+        bookId = args.bookId
         binding.toolbar.title = if (bookId != null) "Edit Book" else "Add Book"
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         setupClickListeners()
