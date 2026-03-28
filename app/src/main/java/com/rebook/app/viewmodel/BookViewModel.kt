@@ -49,6 +49,11 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         MutableLiveData<BookOperationState>(BookOperationState.Idle)
     val operationState: LiveData<BookOperationState> = _operationState
 
+    private val _isLoadingMore = MutableLiveData(false)
+    val isLoadingMore: LiveData<Boolean> = _isLoadingMore
+
+    val hasMoreBooks: Boolean get() = repository.hasMoreBooks
+
     private fun applyFilter(books: List<Book>, query: String, statusFilter: BookStatus?): List<Book> {
         var result = books
         if (statusFilter != null) {
@@ -83,6 +88,18 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
                 repository.syncBooksFromFirestore()
             } finally {
                 onFinished?.invoke()
+            }
+        }
+    }
+
+    fun loadMoreBooks() {
+        if (_isLoadingMore.value == true || !repository.hasMoreBooks) return
+        _isLoadingMore.value = true
+        viewModelScope.launch {
+            try {
+                repository.loadNextPage()
+            } finally {
+                _isLoadingMore.value = false
             }
         }
     }

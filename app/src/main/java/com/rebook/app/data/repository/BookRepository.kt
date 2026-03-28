@@ -9,6 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import com.google.firebase.storage.FirebaseStorage
 import com.rebook.app.data.local.AppDatabase
+import com.rebook.app.data.local.entity.BookEntity
 import com.rebook.app.data.model.Book
 import com.rebook.app.data.model.BookStatus
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +20,7 @@ import java.util.UUID
 class BookRepository(context: Context) {
 
     companion object {
-        private const val SYNC_LIMIT = 50L
+        private const val PAGE_SIZE = 20L
     }
 
     private val bookDao = AppDatabase.getInstance(context).bookDao()
@@ -27,6 +28,10 @@ class BookRepository(context: Context) {
     private val auth = FirebaseAuth.getInstance()
     private val storage = FirebaseStorage.getInstance()
     private val booksRef = firestore.collection("books")
+
+    private var lastDocumentSnapshot: DocumentSnapshot? = null
+    var hasMoreBooks: Boolean = false
+        private set
 
     fun getAllBooks(): Flow<List<Book>> =
         bookDao.getAllBooks().map { entities -> entities.map { Book.fromEntity(it) } }
@@ -39,36 +44,57 @@ class BookRepository(context: Context) {
 
     suspend fun syncBooksFromFirestore() {
         try {
+            lastDocumentSnapshot = null
+            bookDao.deleteAllBooks()
             val snapshot = booksRef
                 .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(SYNC_LIMIT)
+                .limit(PAGE_SIZE)
                 .get()
                 .await()
-            val entities = snapshot.documents.mapNotNull { doc ->
-                val ownerId = doc.getString("ownerId").orEmpty()
-                if (ownerId.isEmpty()) {
-                    android.util.Log.w(
-                        "BookRepository",
-                        "Sync: book ${doc.id} has missing or blank ownerId"
-                    )
-                }
-                com.rebook.app.data.local.entity.BookEntity(
-                    id = doc.id,
-                    title = doc.getString("title").orEmpty(),
-                    author = doc.getString("author").orEmpty(),
-                    description = doc.getString("description").orEmpty(),
-                    imageUrl = doc.getString("imageUrl"),
-                    ownerId = ownerId,
-                    ownerName = doc.getString("ownerName").orEmpty(),
-                    status = doc.getString("status") ?: "AVAILABLE",
-                    requestedById = doc.getString("requestedById"),
-                    createdAt = doc.readCreatedAtMillis()
-                )
-            }
-            bookDao.insertBooks(entities)
+            hasMoreBooks = snapshot.documents.size >= PAGE_SIZE
+            lastDocumentSnapshot = snapshot.documents.lastOrNull()
+            bookDao.insertBooks(snapshot.documents.mapNotNull { it.toBookEntity() })
         } catch (e: Exception) {
             android.util.Log.e("BookRepository", "Sync failed: ${e.message}", e)
         }
+    }
+
+    suspend fun loadNextPage() {
+        val cursor = lastDocumentSnapshot ?: return
+        try {
+            val snapshot = booksRef
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .startAfter(cursor)
+                .limit(PAGE_SIZE)
+                .get()
+                .await()
+            hasMoreBooks = snapshot.documents.size >= PAGE_SIZE
+            if (snapshot.documents.isNotEmpty()) {
+                lastDocumentSnapshot = snapshot.documents.last()
+            }
+            bookDao.insertBooks(snapshot.documents.mapNotNull { it.toBookEntity() })
+        } catch (e: Exception) {
+            android.util.Log.e("BookRepository", "loadNextPage failed: ${e.message}", e)
+        }
+    }
+
+    private fun DocumentSnapshot.toBookEntity(): BookEntity? {
+        val ownerId = getString("ownerId").orEmpty()
+        if (ownerId.isEmpty()) {
+            android.util.Log.w("BookRepository", "book $id has missing or blank ownerId")
+        }
+        return BookEntity(
+            id = id,
+            title = getString("title").orEmpty(),
+            author = getString("author").orEmpty(),
+            description = getString("description").orEmpty(),
+            imageUrl = getString("imageUrl"),
+            ownerId = ownerId,
+            ownerName = getString("ownerName").orEmpty(),
+            status = getString("status") ?: "AVAILABLE",
+            requestedById = getString("requestedById"),
+            createdAt = readCreatedAtMillis()
+        )
     }
 
     suspend fun addBook(book: Book): Result<String> {
