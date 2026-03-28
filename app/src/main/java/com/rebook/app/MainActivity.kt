@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         if (FirebaseAuth.getInstance().currentUser != null) {
             lifecycleScope.launch {
-                UserRepository().syncUserDocumentFromAuth()
+                UserRepository(applicationContext).syncUserDocumentFromAuth()
             }
         }
     }

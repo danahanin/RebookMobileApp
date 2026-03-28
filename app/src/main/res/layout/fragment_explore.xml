@@ -58,12 +58,13 @@
     </LinearLayout>
 
     <TextView
+        android:id="@+id/tv_section_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="16dp"
         android:paddingTop="8dp"
         android:paddingBottom="4dp"
-        android:text="Books available"
+        android:text="All Books"
         android:textStyle="bold"
         android:textSize="16sp"
         android:textColor="?attr/colorOnSurface" />
@@ -109,5 +110,14 @@
         </FrameLayout>
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar_load_more"
+        style="?android:attr/progressBarStyleSmall"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:paddingVertical="6dp"
+        android:visibility="gone" />
 
 </LinearLayout>

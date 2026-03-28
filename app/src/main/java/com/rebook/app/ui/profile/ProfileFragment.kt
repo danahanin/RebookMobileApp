@@ -71,11 +71,18 @@ class ProfileFragment : Fragment() {
     }
 
     private fun observeUser() {
+        userViewModel.isLoadingUser.observe(viewLifecycleOwner) { loading ->
+            binding.loadingOverlay.visibility = if (loading) View.VISIBLE else View.GONE
+        }
         userViewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user != null) {
                 binding.tvUserName.text = user.displayName.ifEmpty { "No name" }
                 binding.tvUserEmail.text = user.email
                 loadProfileImage(user.profileImageUrl)
+            } else {
+                binding.tvUserName.text = ""
+                binding.tvUserEmail.text = ""
+                binding.ivProfileImage.setImageResource(R.drawable.ic_person)
             }
         }
     }
@@ -137,6 +144,7 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnLogout.setOnClickListener {
+            userViewModel.clearCurrentUser()
             authViewModel.logout()
             val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
             mainNavController.navigate(R.id.action_main_to_login)
