@@ -1,6 +1,7 @@
 package com.rebook.app.ui.profile
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -12,6 +13,7 @@ import com.rebook.app.databinding.ItemMyBookBinding
 import com.squareup.picasso.Picasso
 
 class MyBooksAdapter(
+    private val onApproveClick: (Book) -> Unit,
     private val onMessagesClick: (Book) -> Unit,
     private val onEditClick: (Book) -> Unit,
     private val onDeleteClick: (Book) -> Unit
@@ -36,6 +38,10 @@ class MyBooksAdapter(
 
             loadBookImage(book.imageUrl)
             setStatusBadge(book.status)
+
+            val isRequested = book.status == BookStatus.REQUESTED
+            binding.btnApprove.visibility = if (isRequested) View.VISIBLE else View.GONE
+            binding.btnApprove.setOnClickListener { onApproveClick(book) }
 
             binding.btnMessages.setOnClickListener { onMessagesClick(book) }
             binding.btnEdit.setOnClickListener { onEditClick(book) }

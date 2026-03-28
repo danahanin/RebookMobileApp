@@ -68,6 +68,17 @@
             android:layout_gravity="center_vertical">
 
             <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_approve"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="@string/btn_approve_request"
+                android:textSize="11sp"
+                android:minWidth="0dp"
+                android:paddingHorizontal="8dp"
+                android:visibility="gone" />
+
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_messages"
                 style="@style/Widget.Material3.Button.TextButton"
                 android:layout_width="wrap_content"

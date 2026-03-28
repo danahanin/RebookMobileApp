@@ -135,6 +135,18 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun approveRequest(bookId: String) {
+        _operationState.value = BookOperationState.Loading
+        viewModelScope.launch {
+            val result = repository.approveRequest(bookId)
+            _operationState.value = if (result.isSuccess) {
+                BookOperationState.Success
+            } else {
+                BookOperationState.Error(result.exceptionOrNull()?.message ?: "Failed to approve request")
+            }
+        }
+    }
+
     fun unrequestBook(bookId: String) {
         _operationState.value = BookOperationState.Loading
         viewModelScope.launch {
