@@ -35,4 +35,14 @@ class OpenLibraryRepository {
             Result.failure(e)
         }
     }
+
+    suspend fun getWorkDescription(workKey: String): Result<String?> = withContext(Dispatchers.IO) {
+        try {
+            val workId = workKey.removePrefix("/works/")
+            val response = api.getWorkDetails(workId)
+            Result.success(response.getDescriptionText())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }

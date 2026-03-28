@@ -26,6 +26,12 @@ class OpenLibraryViewModel : ViewModel() {
     private val _selectedBook = MutableLiveData<OpenLibraryBook?>(null)
     val selectedBook: LiveData<OpenLibraryBook?> = _selectedBook
 
+    private val _fetchedDescription = MutableLiveData<String?>(null)
+    val fetchedDescription: LiveData<String?> = _fetchedDescription
+
+    private val _isFetchingDetails = MutableLiveData(false)
+    val isFetchingDetails: LiveData<Boolean> = _isFetchingDetails
+
     private var searchJob: Job? = null
 
     fun searchBooks(query: String) {
@@ -69,5 +75,20 @@ class OpenLibraryViewModel : ViewModel() {
 
     fun clearError() {
         _error.value = null
+    }
+
+    fun fetchBookDescription(workKey: String, onComplete: (String?) -> Unit) {
+        viewModelScope.launch {
+            _isFetchingDetails.value = true
+            val result = repository.getWorkDescription(workKey)
+            val description = result.getOrNull()
+            _fetchedDescription.value = description
+            _isFetchingDetails.value = false
+            onComplete(description)
+        }
+    }
+
+    fun clearFetchedDescription() {
+        _fetchedDescription.value = null
     }
 }

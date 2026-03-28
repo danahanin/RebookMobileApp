@@ -33,3 +33,17 @@ enum class CoverSize(val code: String) {
     MEDIUM("M"),
     LARGE("L")
 }
+
+data class OpenLibraryWorkDetails(
+    @SerializedName("description") val description: Any?,
+    @SerializedName("title") val title: String?
+) {
+    @Suppress("UNCHECKED_CAST")
+    fun getDescriptionText(): String? {
+        return when (description) {
+            is String -> description
+            is Map<*, *> -> (description as? Map<String, Any>)?.get("value") as? String
+            else -> null
+        }
+    }
+}

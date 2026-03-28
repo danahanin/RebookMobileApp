@@ -99,6 +99,13 @@ class AddEditBookFragment : Fragment() {
                 savedStateHandle.remove<String>("selected_cover_url")
             }
         }
+
+        savedStateHandle?.getLiveData<String>("selected_description")?.observe(viewLifecycleOwner) { description ->
+            if (!description.isNullOrBlank()) {
+                binding.etDescription.setText(description)
+                savedStateHandle.remove<String>("selected_description")
+            }
+        }
     }
 
     private fun pickImage() {

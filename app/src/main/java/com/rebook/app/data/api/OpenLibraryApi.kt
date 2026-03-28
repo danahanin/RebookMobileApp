@@ -1,6 +1,7 @@
 package com.rebook.app.data.api
 
 import retrofit2.http.GET
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface OpenLibraryApi {
@@ -29,4 +30,9 @@ interface OpenLibraryApi {
         @Query("isbn") isbn: String,
         @Query("limit") limit: Int = 10
     ): OpenLibrarySearchResponse
+
+    @GET("works/{workId}.json")
+    suspend fun getWorkDetails(
+        @Path("workId") workId: String
+    ): OpenLibraryWorkDetails
 }

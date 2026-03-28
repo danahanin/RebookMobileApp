@@ -47,17 +47,38 @@ class BookSearchFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = BookSearchAdapter { book ->
-            val navController = findNavController()
-            navController.previousBackStackEntry?.savedStateHandle?.apply {
-                set("selected_title", book.title ?: "")
-                set("selected_author", book.getAuthorsString())
-                set("selected_cover_url", book.getCoverUrl(CoverSize.LARGE))
-            }
-            navController.popBackStack()
+            selectBookAndFetchDescription(book)
         }
 
         binding.rvResults.layoutManager = LinearLayoutManager(requireContext())
         binding.rvResults.adapter = adapter
+    }
+
+    private fun selectBookAndFetchDescription(book: com.rebook.app.data.api.OpenLibraryBook) {
+        val workKey = book.key
+        if (workKey.isNullOrBlank()) {
+            returnBookData(book, null)
+            return
+        }
+
+        binding.progressBar.visibility = View.VISIBLE
+        binding.rvResults.alpha = 0.5f
+
+        viewModel.fetchBookDescription(workKey) { description ->
+            binding.rvResults.alpha = 1f
+            returnBookData(book, description)
+        }
+    }
+
+    private fun returnBookData(book: com.rebook.app.data.api.OpenLibraryBook, description: String?) {
+        val navController = findNavController()
+        navController.previousBackStackEntry?.savedStateHandle?.apply {
+            set("selected_title", book.title ?: "")
+            set("selected_author", book.getAuthorsString())
+            set("selected_cover_url", book.getCoverUrl(CoverSize.LARGE))
+            set("selected_description", description ?: "")
+        }
+        navController.popBackStack()
     }
 
     private fun setupSearch() {
