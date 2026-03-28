@@ -1,6 +1,7 @@
 package com.rebook.app.ui.book
 
 import android.os.Bundle
+import android.text.method.LinkMovementMethod
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -14,6 +15,7 @@ import com.rebook.app.R
 import com.rebook.app.data.model.BookStatus
 import com.rebook.app.databinding.FragmentBookDetailsBinding
 import com.rebook.app.util.BookOperationState
+import com.rebook.app.util.MarkdownUtils
 import com.rebook.app.viewmodel.BookViewModel
 import com.squareup.picasso.Picasso
 
@@ -58,7 +60,12 @@ class BookDetailsFragment : Fragment() {
             binding.tvTitle.text = book.title
             binding.tvAuthor.text = "Author: ${book.author}"
             binding.tvOwner.text = "Owner: ${book.ownerName.ifBlank { "Unknown" }}"
-            binding.tvDescription.text = book.description.ifBlank { "No description provided." }
+            binding.tvDescription.text = if (book.description.isBlank()) {
+                "No description provided."
+            } else {
+                MarkdownUtils.toSpanned(book.description)
+            }
+            binding.tvDescription.movementMethod = LinkMovementMethod.getInstance()
 
             if (!book.imageUrl.isNullOrEmpty()) {
                 Picasso.get()
