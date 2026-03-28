@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
 import com.rebook.app.R
@@ -25,6 +26,7 @@ class BookDetailsFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val bookViewModel: BookViewModel by activityViewModels()
+    private val args: BookDetailsFragmentArgs by navArgs()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -38,11 +40,7 @@ class BookDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bookId = arguments?.getString("bookId")
-        if (bookId == null) {
-            findNavController().popBackStack()
-            return
-        }
+        val bookId = args.bookId
 
         binding.toolbar.setNavigationOnClickListener {
             findNavController().popBackStack()
