@@ -1,18 +1,19 @@
 package com.rebook.app.viewmodel
 
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rebook.app.data.repository.AuthRepository
 import com.rebook.app.data.repository.UserRepository
 import com.rebook.app.util.AuthState
 import kotlinx.coroutines.launch
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = AuthRepository()
-    private val userRepository = UserRepository()
+    private val userRepository = UserRepository(application)
 
     private val _authState = MutableLiveData<AuthState>(AuthState.Idle)
     val authState: LiveData<AuthState> = _authState

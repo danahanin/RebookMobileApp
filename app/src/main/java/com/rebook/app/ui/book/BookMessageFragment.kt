@@ -32,7 +32,7 @@ class BookMessageFragment : Fragment() {
     private val bookViewModel: BookViewModel by activityViewModels()
     private val messageViewModel: MessageViewModel by viewModels()
 
-    private val userRepository = UserRepository()
+    private val userRepository by lazy { UserRepository(requireContext()) }
     private var subtitleResolveJob: Job? = null
 
     private lateinit var messageAdapter: MessageListAdapter

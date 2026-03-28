@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.rebook.app.R
 import com.rebook.app.data.model.BookStatus
 import com.rebook.app.databinding.FragmentExploreBinding
@@ -46,6 +47,7 @@ class ExploreFragment : Fragment() {
             bookViewModel.syncBooks { binding.swipeRefresh.isRefreshing = false }
         }
         setupFilterButton()
+        observeStatusFilter()
     }
 
     private fun setupRecyclerView() {
@@ -66,9 +68,20 @@ class ExploreFragment : Fragment() {
                 )
             }
         )
+        val layoutManager = LinearLayoutManager(requireContext())
         binding.rvBooks.apply {
-            layoutManager = LinearLayoutManager(requireContext())
+            this.layoutManager = layoutManager
             adapter = bookAdapter
+            addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    if (dy <= 0) return
+                    val totalItems = layoutManager.itemCount
+                    val lastVisible = layoutManager.findLastVisibleItemPosition()
+                    if (lastVisible >= totalItems - 4 && bookViewModel.hasMoreBooks) {
+                        bookViewModel.loadMoreBooks()
+                    }
+                }
+            })
         }
     }
 
@@ -77,6 +90,9 @@ class ExploreFragment : Fragment() {
             bookAdapter.submitList(books)
             binding.tvEmpty.visibility = if (books.isEmpty()) View.VISIBLE else View.GONE
             binding.rvBooks.visibility = if (books.isEmpty()) View.GONE else View.VISIBLE
+        }
+        bookViewModel.isLoadingMore.observe(viewLifecycleOwner) { loading ->
+            binding.progressBarLoadMore.visibility = if (loading) View.VISIBLE else View.GONE
         }
     }
 
@@ -102,6 +118,12 @@ class ExploreFragment : Fragment() {
     private fun setupSearch() {
         binding.etSearch.doAfterTextChanged { text ->
             bookViewModel.setSearchQuery(text?.toString() ?: "")
+        }
+    }
+
+    private fun observeStatusFilter() {
+        bookViewModel.statusFilter.observe(viewLifecycleOwner) { filter ->
+            binding.tvSectionTitle.text = if (filter == BookStatus.AVAILABLE) "Books Available" else "All Books"
         }
     }
 
