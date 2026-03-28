@@ -15,7 +15,7 @@ import kotlinx.coroutines.launch
 class ChatListViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = MessageRepository()
-    private val userRepository = UserRepository()
+    private val userRepository = UserRepository(application)
 
     private val _threadRows = MutableLiveData<List<ChatThreadRow>>(emptyList())
     val threadRows: LiveData<List<ChatThreadRow>> = _threadRows

@@ -1,18 +1,19 @@
 package com.rebook.app.viewmodel
 
+import android.app.Application
 import android.net.Uri
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rebook.app.data.model.User
 import com.rebook.app.data.repository.UserRepository
 import com.rebook.app.util.UserOperationState
 import kotlinx.coroutines.launch
 
-class UserViewModel : ViewModel() {
+class UserViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val repository = UserRepository()
+    private val repository = UserRepository(application)
 
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> = _currentUser
