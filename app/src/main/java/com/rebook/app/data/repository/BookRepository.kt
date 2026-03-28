@@ -46,11 +46,7 @@ class BookRepository(context: Context) {
         try {
             lastDocumentSnapshot = null
             bookDao.deleteAllBooks()
-            val snapshot = booksRef
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .limit(PAGE_SIZE)
-                .get()
-                .await()
+            val snapshot = buildPageQuery().get().await()
             hasMoreBooks = snapshot.documents.size >= PAGE_SIZE
             lastDocumentSnapshot = snapshot.documents.lastOrNull()
             bookDao.insertBooks(snapshot.documents.mapNotNull { it.toBookEntity() })
@@ -62,12 +58,7 @@ class BookRepository(context: Context) {
     suspend fun loadNextPage() {
         val cursor = lastDocumentSnapshot ?: return
         try {
-            val snapshot = booksRef
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .startAfter(cursor)
-                .limit(PAGE_SIZE)
-                .get()
-                .await()
+            val snapshot = buildPageQuery(cursor).get().await()
             hasMoreBooks = snapshot.documents.size >= PAGE_SIZE
             if (snapshot.documents.isNotEmpty()) {
                 lastDocumentSnapshot = snapshot.documents.last()
@@ -77,6 +68,12 @@ class BookRepository(context: Context) {
             android.util.Log.e("BookRepository", "loadNextPage failed: ${e.message}", e)
         }
     }
+
+    private fun buildPageQuery(cursor: DocumentSnapshot? = null) =
+        booksRef
+            .orderBy("createdAt", Query.Direction.DESCENDING)
+            .let { if (cursor != null) it.startAfter(cursor) else it }
+            .limit(PAGE_SIZE)
 
     private fun DocumentSnapshot.toBookEntity(): BookEntity? {
         val ownerId = getString("ownerId").orEmpty()

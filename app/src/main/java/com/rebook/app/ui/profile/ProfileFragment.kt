@@ -16,7 +16,7 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.rebook.app.R
 import com.rebook.app.data.model.Book
 import com.rebook.app.databinding.FragmentProfileBinding
-import com.rebook.app.util.BookOperationState
+import com.rebook.app.util.observeBookOperations
 import com.rebook.app.viewmodel.AuthViewModel
 import com.rebook.app.viewmodel.BookViewModel
 import com.rebook.app.viewmodel.UserViewModel
@@ -30,6 +30,9 @@ class ProfileFragment : Fragment() {
     private val authViewModel: AuthViewModel by activityViewModels()
     private val userViewModel: UserViewModel by activityViewModels()
     private val bookViewModel: BookViewModel by activityViewModels()
+
+    private val mainNav
+        get() = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
 
     private lateinit var myBooksAdapter: MyBooksAdapter
 
@@ -117,21 +120,9 @@ class ProfileFragment : Fragment() {
     }
 
     private fun observeBookOperations() {
-        bookViewModel.operationState.observe(viewLifecycleOwner) { state ->
-            when (state) {
-                is BookOperationState.Loading -> binding.progressBar.visibility = View.VISIBLE
-                is BookOperationState.Success -> {
-                    binding.progressBar.visibility = View.GONE
-                    bookViewModel.resetOperationState()
-                }
-                is BookOperationState.Error -> {
-                    binding.progressBar.visibility = View.GONE
-                    Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
-                    bookViewModel.resetOperationState()
-                }
-                is BookOperationState.Idle -> binding.progressBar.visibility = View.GONE
-            }
-        }
+        observeBookOperations(bookViewModel, { show ->
+            binding.progressBar.visibility = if (show) View.VISIBLE else View.GONE
+        })
     }
 
     private fun setupButtons() {
@@ -146,31 +137,19 @@ class ProfileFragment : Fragment() {
         binding.btnLogout.setOnClickListener {
             userViewModel.clearCurrentUser()
             authViewModel.logout()
-            val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-            mainNavController.navigate(R.id.action_main_to_login)
+            mainNav.navigate(R.id.action_main_to_login)
         }
     }
 
-    private fun navigateToEditProfile() {
-        val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-        mainNavController.navigate(R.id.action_main_to_editProfile)
-    }
+    private fun navigateToEditProfile() = mainNav.navigate(R.id.action_main_to_editProfile)
 
-    private fun navigateToAddBook() {
-        val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-        mainNavController.navigate(R.id.action_main_to_addEditBook)
-    }
+    private fun navigateToAddBook() = mainNav.navigate(R.id.action_main_to_addEditBook)
 
-    private fun navigateToBookMessages(bookId: String) {
-        val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-        mainNavController.navigate(R.id.bookChatListFragment, bundleOf("bookId" to bookId))
-    }
+    private fun navigateToBookMessages(bookId: String) =
+        mainNav.navigate(R.id.bookChatListFragment, bundleOf("bookId" to bookId))
 
-    private fun navigateToEditBook(bookId: String) {
-        val mainNavController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment)
-        val bundle = Bundle().apply { putString("bookId", bookId) }
-        mainNavController.navigate(R.id.action_main_to_addEditBook, bundle)
-    }
+    private fun navigateToEditBook(bookId: String) =
+        mainNav.navigate(R.id.action_main_to_addEditBook, Bundle().apply { putString("bookId", bookId) })
 
     private fun showApproveConfirmation(bookId: String) {
         MaterialAlertDialogBuilder(requireContext())

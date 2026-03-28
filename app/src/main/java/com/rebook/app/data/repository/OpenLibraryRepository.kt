@@ -9,40 +9,26 @@ class OpenLibraryRepository {
 
     private val api = OpenLibraryService.api
 
-    suspend fun searchBooks(query: String): Result<List<OpenLibraryBook>> = withContext(Dispatchers.IO) {
-        try {
-            val response = api.searchBooks(query)
-            Result.success(response.docs)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+    suspend fun searchBooks(query: String): Result<List<OpenLibraryBook>> =
+        ioResult { api.searchBooks(query).docs }
+
+    suspend fun searchByTitle(title: String): Result<List<OpenLibraryBook>> =
+        ioResult { api.searchByTitle(title).docs }
+
+    suspend fun searchByIsbn(isbn: String): Result<List<OpenLibraryBook>> =
+        ioResult { api.searchByIsbn(isbn).docs }
+
+    suspend fun getWorkDescription(workKey: String): Result<String?> = ioResult {
+        val workId = workKey.removePrefix("/works/")
+        api.getWorkDetails(workId).getDescriptionText()
     }
 
-    suspend fun searchByTitle(title: String): Result<List<OpenLibraryBook>> = withContext(Dispatchers.IO) {
-        try {
-            val response = api.searchByTitle(title)
-            Result.success(response.docs)
-        } catch (e: Exception) {
-            Result.failure(e)
+    private suspend fun <T> ioResult(block: suspend () -> T): Result<T> =
+        withContext(Dispatchers.IO) {
+            try {
+                Result.success(block())
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
-    }
-
-    suspend fun searchByIsbn(isbn: String): Result<List<OpenLibraryBook>> = withContext(Dispatchers.IO) {
-        try {
-            val response = api.searchByIsbn(isbn)
-            Result.success(response.docs)
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
-
-    suspend fun getWorkDescription(workKey: String): Result<String?> = withContext(Dispatchers.IO) {
-        try {
-            val workId = workKey.removePrefix("/works/")
-            val response = api.getWorkDetails(workId)
-            Result.success(response.getDescriptionText())
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 }

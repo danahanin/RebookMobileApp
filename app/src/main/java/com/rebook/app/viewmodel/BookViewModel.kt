@@ -104,74 +104,26 @@ class BookViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun addBook(book: Book) {
-        _operationState.value = BookOperationState.Loading
-        viewModelScope.launch {
-            val result = repository.addBook(book)
-            _operationState.value = if (result.isSuccess) {
-                BookOperationState.Success
-            } else {
-                BookOperationState.Error(result.exceptionOrNull()?.message ?: "Failed to add book")
-            }
-        }
-    }
+    fun addBook(book: Book) = runBookOp("Failed to add book") { repository.addBook(book) }
 
-    fun updateBook(book: Book) {
-        _operationState.value = BookOperationState.Loading
-        viewModelScope.launch {
-            val result = repository.updateBook(book)
-            _operationState.value = if (result.isSuccess) {
-                BookOperationState.Success
-            } else {
-                BookOperationState.Error(result.exceptionOrNull()?.message ?: "Failed to update book")
-            }
-        }
-    }
+    fun updateBook(book: Book) = runBookOp("Failed to update book") { repository.updateBook(book) }
 
-    fun deleteBook(bookId: String) {
-        _operationState.value = BookOperationState.Loading
-        viewModelScope.launch {
-            val result = repository.deleteBook(bookId)
-            _operationState.value = if (result.isSuccess) {
-                BookOperationState.Success
-            } else {
-                BookOperationState.Error(result.exceptionOrNull()?.message ?: "Failed to delete book")
-            }
-        }
-    }
+    fun deleteBook(bookId: String) = runBookOp("Failed to delete book") { repository.deleteBook(bookId) }
 
-    fun requestBook(bookId: String) {
-        _operationState.value = BookOperationState.Loading
-        viewModelScope.launch {
-            val result = repository.requestBook(bookId)
-            _operationState.value = if (result.isSuccess) {
-                BookOperationState.Success
-            } else {
-                BookOperationState.Error(result.exceptionOrNull()?.message ?: "Failed to request book")
-            }
-        }
-    }
+    fun requestBook(bookId: String) = runBookOp("Failed to request book") { repository.requestBook(bookId) }
 
-    fun approveRequest(bookId: String) {
-        _operationState.value = BookOperationState.Loading
-        viewModelScope.launch {
-            val result = repository.approveRequest(bookId)
-            _operationState.value = if (result.isSuccess) {
-                BookOperationState.Success
-            } else {
-                BookOperationState.Error(result.exceptionOrNull()?.message ?: "Failed to approve request")
-            }
-        }
-    }
+    fun approveRequest(bookId: String) = runBookOp("Failed to approve request") { repository.approveRequest(bookId) }
 
-    fun unrequestBook(bookId: String) {
+    fun unrequestBook(bookId: String) = runBookOp("Failed to cancel request") { repository.unrequestBook(bookId) }
+
+    private fun runBookOp(errorMessage: String, block: suspend () -> Result<*>) {
         _operationState.value = BookOperationState.Loading
         viewModelScope.launch {
-            val result = repository.unrequestBook(bookId)
+            val result = block()
             _operationState.value = if (result.isSuccess) {
                 BookOperationState.Success
             } else {
-                BookOperationState.Error(result.exceptionOrNull()?.message ?: "Failed to cancel request")
+                BookOperationState.Error(result.exceptionOrNull()?.message ?: errorMessage)
             }
         }
     }
