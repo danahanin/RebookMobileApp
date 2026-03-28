@@ -54,6 +54,7 @@
     <string name="label_add_photo">Add Photo</string>
     <string name="error_empty_title">Title is required</string>
     <string name="error_empty_author">Author is required</string>
+    <string name="btn_search_open_library">Search Open Library</string>
 
     <!-- Messages -->
     <string name="messages_screen_title">Messages</string>

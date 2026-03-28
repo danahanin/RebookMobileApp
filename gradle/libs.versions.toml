@@ -19,6 +19,8 @@ ksp = "2.1.0-1.0.29"
 picasso = "2.8"
 circleImageView = "3.1.0"
 swipeRefreshLayout = "1.1.0"
+retrofit = "2.9.0"
+okhttp = "4.12.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -45,6 +47,9 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 picasso = { group = "com.squareup.picasso", name = "picasso", version.ref = "picasso" }
 circle-imageview = { group = "de.hdodenhof", name = "circleimageview", version.ref = "circleImageView" }
 androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swipeRefreshLayout" }
+retrofit = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+okhttp-logging = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

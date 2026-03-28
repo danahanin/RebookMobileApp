@@ -29,6 +29,7 @@ class AddEditBookFragment : Fragment() {
     private var bookId: String? = null
     private var existingBook: Book? = null
     private var selectedImageUri: Uri? = null
+    private var selectedCoverUrl: String? = null
     private var isUploading = false
 
     private val pickImageLauncher = registerForActivityResult(
@@ -53,12 +54,58 @@ class AddEditBookFragment : Fragment() {
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
         setupClickListeners()
         observeOperationState()
+        observeSearchResult()
         loadBookIfEditing()
     }
 
     private fun setupClickListeners() {
         binding.cardImage.setOnClickListener { pickImage() }
         binding.btnSave.setOnClickListener { saveBook() }
+        binding.btnSearchBook.setOnClickListener { navigateToBookSearch() }
+    }
+
+    private fun navigateToBookSearch() {
+        findNavController().navigate(R.id.action_addEditBook_to_bookSearch)
+    }
+
+    private fun observeSearchResult() {
+        val navController = findNavController()
+        val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+
+        savedStateHandle?.getLiveData<String>("selected_title")?.observe(viewLifecycleOwner) { title ->
+            if (!title.isNullOrBlank()) {
+                binding.etTitle.setText(title)
+                savedStateHandle.remove<String>("selected_title")
+            }
+        }
+
+        savedStateHandle?.getLiveData<String>("selected_author")?.observe(viewLifecycleOwner) { author ->
+            if (!author.isNullOrBlank()) {
+                binding.etAuthor.setText(author)
+                savedStateHandle.remove<String>("selected_author")
+            }
+        }
+
+        savedStateHandle?.getLiveData<String>("selected_cover_url")?.observe(viewLifecycleOwner) { coverUrl ->
+            if (!coverUrl.isNullOrBlank()) {
+                selectedCoverUrl = coverUrl
+                selectedImageUri = null
+                binding.ivBookImage.visibility = View.VISIBLE
+                binding.layoutAddPhoto.visibility = View.GONE
+                Picasso.get()
+                    .load(coverUrl)
+                    .placeholder(R.color.green_light)
+                    .into(binding.ivBookImage)
+                savedStateHandle.remove<String>("selected_cover_url")
+            }
+        }
+
+        savedStateHandle?.getLiveData<String>("selected_description")?.observe(viewLifecycleOwner) { description ->
+            if (!description.isNullOrBlank()) {
+                binding.etDescription.setText(description)
+                savedStateHandle.remove<String>("selected_description")
+            }
+        }
     }
 
     private fun pickImage() {
@@ -138,6 +185,9 @@ class AddEditBookFragment : Fragment() {
             val result = com.rebook.app.data.repository.BookRepository(requireContext())
                 .uploadBookImage(uri)
             return result.getOrNull()
+        }
+        if (selectedCoverUrl != null) {
+            return selectedCoverUrl
         }
         return existingBook?.imageUrl
     }

@@ -118,7 +118,17 @@
             app:argType="string"
             app:nullable="true"
             android:defaultValue="@null" />
+        <action
+            android:id="@+id/action_addEditBook_to_bookSearch"
+            app:destination="@id/bookSearchFragment" />
     </fragment>
+
+    <fragment
+        android:id="@+id/bookSearchFragment"
+        android:name="com.rebook.app.ui.book.BookSearchFragment"
+        android:label="Search Books"
+        tools:layout="@layout/fragment_book_search" />
+
 
     <fragment
         android:id="@+id/editProfileFragment"
