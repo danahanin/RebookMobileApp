@@ -18,6 +18,9 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     private val _currentUser = MutableLiveData<User?>()
     val currentUser: LiveData<User?> = _currentUser
 
+    private val _isLoadingUser = MutableLiveData(false)
+    val isLoadingUser: LiveData<Boolean> = _isLoadingUser
+
     private val _operationState = MutableLiveData<UserOperationState>(UserOperationState.Idle)
     val operationState: LiveData<UserOperationState> = _operationState
 
@@ -29,8 +32,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun loadCurrentUser() {
+        _isLoadingUser.value = true
         viewModelScope.launch {
             _currentUser.value = repository.getCurrentUserFromFirestore()
+            _isLoadingUser.value = false
         }
     }
 
@@ -62,6 +67,10 @@ class UserViewModel(application: Application) : AndroidViewModel(application) {
                 )
             }
         }
+    }
+
+    fun clearCurrentUser() {
+        _currentUser.value = null
     }
 
     fun resetOperationState() {

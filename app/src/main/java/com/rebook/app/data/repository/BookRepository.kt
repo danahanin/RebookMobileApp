@@ -20,7 +20,7 @@ import java.util.UUID
 class BookRepository(context: Context) {
 
     companion object {
-        private const val PAGE_SIZE = 20L
+        private const val PAGE_SIZE = 10L
     }
 
     private val bookDao = AppDatabase.getInstance(context).bookDao()
